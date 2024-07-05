@@ -1,0 +1,11 @@
+body {
+    display: grid;
+    justify-items: center;
+    height: 100vh;
+}
+
+.mainframe{
+    width: 50%;
+    height: 90%;
+    background-color: rgb(252, 240, 240);
+}
