@@ -9,12 +9,12 @@
             display: grid;
             justify-items: center;
             height: 100vh;
-            overflow-y: hidden;
         }
 
         .mainframe {
             width: 50%;
-            height: 80%;
+            height: 90%;
+            background-color: rgb(252, 240, 240);
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             grid-template-rows: repeat(5, 1fr);
@@ -24,26 +24,30 @@
 
         .mainframe-input {
             grid-area: 5 / 1 / 6 / 4;
-            height: 125%;
+            margin: 5%;
         }
 
         .mainframe-send {
             grid-area: 5 / 4 / 6 / 5;
             background-color: rgb(255, 255, 255);
+            margin-top: 70%;
+            margin-right: 5%;
+            height: 25%;
         }
 
         .mainframe-attach {
             grid-area: 5 / 5 / 6 / 6;
+            margin-top: 70%;
+            margin-right: 5%;
+            height: 25%;
+
         }
 
         .mainframe-field {
             grid-area: 1 / 1 / 5 / 6;
             background-color: rgb(255, 255, 255);
             margin: 3%;
-            width: 700px;
-            height: 700px; 
-            overflow-y: auto; 
-            border: 1px solid #ccc;
+            overflow: scroll;
         }
 
         .message-author {
@@ -56,19 +60,12 @@
         }
 
         .message-image {
+            max-width: 300px;
             max-height: 300px;
-            margin: 2%;
-        }
-
-        .message-container-single {
-            display: flex;
-            flex-direction: column;
-            background-color: rgb(237, 247, 247);
-            margin-bottom: 5%;
         }
     </style>
 
-    <title>Wladislaw Indrei</title>
+    <title>---</title>
 </head>
 
 <body>
@@ -86,26 +83,13 @@
     const inputElement = document.getElementById('input');
     const attachElement = document.getElementById('attach');
     const messageContainer = document.getElementById('mainframe-field');
-    const url = 'https://b02905011faf0b4632dc42e350e4436d.serveo.net/'
 
     let attachFileData = null;
     let latestDataId = 0;
-    let username = generateRandomString(10);
-
-    function generateRandomString(length) {
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let result = '';
-        const charactersLength = characters.length;
-        for (let i = 0; i < length; i++) {
-            result += characters.charAt(Math.floor(Math.random() * charactersLength));
-        }
-        return result;
-    }
 
     function addMessageGraphics(author, text, image) {
-
-        const singleMessageDiv = document.createElement('div');
-        singleMessageDiv.className = 'message-container-single';
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message-container';
 
         const authorSpan = document.createElement('span');
         authorSpan.className = 'message-author';
@@ -115,22 +99,31 @@
         textParagraph.className = 'message-text';
         textParagraph.textContent = text;
 
-        const imageElement = document.createElement('img');
-        imageElement.className = 'message-image';
-
-        singleMessageDiv.appendChild(authorSpan);
-        singleMessageDiv.appendChild(textParagraph);
-
         if (image) {
+    
+            const reader = new FileReader();
+            const imageElement = document.createElement('img');
+            reader.onload = function (e) {
+                imageElement.src = e.target.result;
+            };
+            reader.readAsDataURL(image);
+
+            imageElement.className = 'message-image';
             imageElement.src = image;
-            singleMessageDiv.appendChild(imageElement);
+            imageElement.alt = 'Message Image';
+
+            messageDiv.appendChild(imageElement);
         }
 
-        messageContainer.appendChild(singleMessageDiv);
+        messageDiv.appendChild(authorSpan);
+        messageDiv.appendChild(textParagraph);
+
+
+        messageContainer.appendChild(messageDiv);
     }
 
     function autoUpdate() {
-        const messages = fetch(`${url}message/${latestDataId}`, {
+        const messages = fetch(`http://localhost:3001/message/${latestDataId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -138,13 +131,11 @@
         });
         messages.then(data => data.json().then(arr => {
             if (arr.length) {
-                
+                latestDataId = latestDataId + arr.length;
                 for (let i = 0; i < arr.length; i++) {
                     const arrElement = JSON.parse(arr[i]);
-                    addMessageGraphics(`${latestDataId + i + 1}) ` + arrElement.author, arrElement.message, arrElement.data);
+                    addMessageGraphics(arrElement.author, arrElement.message, arrElement.data);
                 }
-                latestDataId = latestDataId + arr.length;
-                messageContainer.scrollTop = messageContainer.scrollHeight;
                 autoUpdate();
             }
             //Mb handle timeout???
@@ -159,17 +150,24 @@
             alert('No data to send');
             return;
         }
-     
-        const response = fetch(`${url}message`,
+
+        let base64String = null;
+
+        if (attachFileData){
+            base64String = attachFileData.split(',');
+            console.log(base64String);
+        }
+
+        const response = fetch('http://localhost:3001/message',
             {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    author: username,
+                    author: "asd",
                     message: inputElement.value,
-                    data: attachFileData
+                    data: base64String
                 })
             });
 
@@ -180,14 +178,13 @@
         const uploadedFileInfo = attachElement.files[0];
         let formData = null;
 
-
         if (uploadedFileInfo) {
             const reader = new FileReader();
 
             reader.onload = function (event) {
                 attachFileData = event.target.result;
             };
-            reader.readAsDataURL(uploadedFileInfo);
+            reader.readAsText(uploadedFileInfo);
         }
     });
 

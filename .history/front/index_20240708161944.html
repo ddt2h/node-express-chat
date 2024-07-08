@@ -68,7 +68,7 @@
         }
     </style>
 
-    <title>Wladislaw Indrei</title>
+    <title>---</title>
 </head>
 
 <body>
@@ -159,8 +159,8 @@
             alert('No data to send');
             return;
         }
-     
-        const response = fetch(`${url}message`,
+
+        const response = fetch('http://localhost:3001/message',
             {
                 method: 'POST',
                 headers: {

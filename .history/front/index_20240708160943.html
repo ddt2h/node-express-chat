@@ -57,18 +57,17 @@
 
         .message-image {
             max-height: 300px;
-            margin: 2%;
         }
 
         .message-container-single {
             display: flex;
             flex-direction: column;
-            background-color: rgb(237, 247, 247);
+            background-color: aqua;
             margin-bottom: 5%;
         }
     </style>
 
-    <title>Wladislaw Indrei</title>
+    <title>---</title>
 </head>
 
 <body>
@@ -86,7 +85,6 @@
     const inputElement = document.getElementById('input');
     const attachElement = document.getElementById('attach');
     const messageContainer = document.getElementById('mainframe-field');
-    const url = 'https://b02905011faf0b4632dc42e350e4436d.serveo.net/'
 
     let attachFileData = null;
     let latestDataId = 0;
@@ -130,7 +128,7 @@
     }
 
     function autoUpdate() {
-        const messages = fetch(`${url}message/${latestDataId}`, {
+        const messages = fetch(`http://localhost:3001/message/${latestDataId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -138,12 +136,11 @@
         });
         messages.then(data => data.json().then(arr => {
             if (arr.length) {
-                
+                latestDataId = latestDataId + arr.length;
                 for (let i = 0; i < arr.length; i++) {
                     const arrElement = JSON.parse(arr[i]);
-                    addMessageGraphics(`${latestDataId + i + 1}) ` + arrElement.author, arrElement.message, arrElement.data);
+                    addMessageGraphics(`${latestDataId + i}) ` + arrElement.author, arrElement.message, arrElement.data);
                 }
-                latestDataId = latestDataId + arr.length;
                 messageContainer.scrollTop = messageContainer.scrollHeight;
                 autoUpdate();
             }
@@ -159,8 +156,8 @@
             alert('No data to send');
             return;
         }
-     
-        const response = fetch(`${url}message`,
+
+        const response = fetch('http://localhost:3001/message',
             {
                 method: 'POST',
                 headers: {
