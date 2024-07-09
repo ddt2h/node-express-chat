@@ -1,2 +1,4 @@
 key
 key.pub
+/node_modules
+.history/*
