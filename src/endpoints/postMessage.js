@@ -14,3 +14,4 @@ export default function postMessage(express, url, messageBuffer, pendingRequests
         res.status(201).send('Created');
     });
 }
+console.log('');
